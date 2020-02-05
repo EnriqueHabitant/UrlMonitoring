@@ -4,15 +4,13 @@ const fs = require("fs");
 const scrape = require('url-metadata');
 const cheerio = require('cheerio');
 
-const { apiURL, apiSistrix } = require('./src/constants');
-const SistrixClass = require('./src/controllers/Sistrix');
-const Sistrix = new SistrixClass(apiSistrix, 'domain.sichtbarkeitsindex');
+const { apiURL } = require('./src/constants');
 
 /**
  * Lectura del listado de url y obtención de los datos de la url.
  */
-fs.readFile('/home/habitant/urlMonitor/input/urls.txt', "utf-8", (err, data) => {
-  const urls = data.toString().split('\n')
+fs.readFile('./input/urls.txt', "utf-8", (err, data) => {
+  const urls = data.toString().replace(/\n/g, '').split('\r');
   const dateGet = new Date;
   date = `${dateGet.getFullYear()}-${(dateGet.getMonth() + 1) < 10 ? '0' + (dateGet.getMonth() + 1) : dateGet.getMonth() + 1}-${dateGet.getDate() < 10 ? '0' + dateGet.getDate() : dateGet.getDate()}`
   let delay = 5000
@@ -62,13 +60,6 @@ fs.readFile('/home/habitant/urlMonitor/input/urls.txt', "utf-8", (err, data) => 
                       .then(res => console.log(e, '------------- OK'))
                   } else { // Si la url estaba registrada se hace un PUT (Update)
                     data = JSON.parse(data)
-                    /**
-                     * Llamada a la api de SISTRIX y comprueba que sea DOMINGO
-                     * si no es domingo simplemente reescribe el dato anterior 
-                     */
-                    // data.interaction[0].VI = (dateGet.getDay()) == 0 ?
-                    //   await Sistrix.visibilityIndex(e) :
-                    //   ok.interaction[ok.interaction.length - 1].VI;
 
                     fetch(`${apiURL}/${idUrl}/${urls.length}/${i}`, { method: 'PUT', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
                       .then(res => res.json())

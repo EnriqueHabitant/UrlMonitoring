@@ -7,12 +7,18 @@ const msgChange = { "msg": '' }
 // Urls Model
 const Urls = require('../models/urls');
 
-// GET all URLS
+/**
+ * GET todas las URLS & toda la Data
+ */
 router.get('/', async (req, res) => {
   const int = await Urls.find();
   res.json(int);
 });
 
+/**
+ * GET todas las urls & solo changes data 
+ * Lo estamos utilizando para hacer el dashboard de cambios.
+ */
 router.get('/changes/', async (req, res) => {
   const int = await Urls.find();
   const changes = []
@@ -47,13 +53,17 @@ router.get('/changes/', async (req, res) => {
   res.json(changes);
 });
 
-// GET one URL
+/**
+ * GET url & toda su Data
+ */
 router.get('/:id', async (req, res) => {
   const int = await Urls.findById(req.params.id);
   res.json(int);
 });
 
-// GET one URLS change
+/**
+ * GET url & solo changes data
+ */
 router.get('/changes/:id', async (req, res) => {
   const int = await Urls.findById(req.params.id);
   int.changes.map((e, i) => {
@@ -76,14 +86,19 @@ router.get('/changes/:id', async (req, res) => {
   res.json(changes);
 });
 
-// GET one URL and one DAY
+/**
+ * GET url, en un día concreto 
+ */
 router.get('/:id/:date', async (req, res) => {
   const int = await Urls.find({ _id: req.params.id });
   const index = int[0].interaction.findIndex(e => e.date == req.params.date)
   const responde = { interaction: int[0].interaction[index], changes: int[0].changes[index] }
   res.json(responde);
 });
-// GET one URL and DAY to DAY
+
+/**
+ * GET url, entre dos fechas
+ */
 router.get('/:id/:dateI/:dateF', async (req, res) => {
   const int = await Urls.find({ _id: req.params.id });
   const index = int[0].interaction.findIndex(e => e.date == req.params.dateI)
@@ -92,7 +107,49 @@ router.get('/:id/:dateI/:dateF', async (req, res) => {
   res.json(responde);
 });
 
-// ADD a new URL
+/**
+ * GET url y propiedad de un día
+ */
+router.get('/:id/:date/content/:propiedad', async (req, res) => {
+  const propiedades = req.params.propiedad.split(';')
+  const int = await Urls.find({ _id: req.params.id })
+  const index = int[0].interaction.findIndex(e => e.date == req.params.date)
+
+  const responde = { interaction: {}, changes: {} };
+  propiedades.map(e => {
+    responde.interaction[e] = int[0].interaction[index][e]
+    responde.changes[e] = int[0].changes[index][e]
+  })
+
+  res.json(responde);
+});
+
+/**
+ * GET url y propiedades de varios días
+ */
+router.get('/:id/:dateI/:dateF/content/:propiedad', async (req, res) => {
+  const propiedades = req.params.propiedad.split(';')
+  const int = await Urls.find({ _id: req.params.id });
+  const index = int[0].interaction.findIndex(e => e.date == req.params.dateI)
+  const indexF = int[0].interaction.findIndex(e => e.date == req.params.dateF)
+  const responde = { interaction: {}, changes: {} };
+  responde.interaction[index] = {}
+  responde.changes[index] = {}
+  responde.interaction[indexF] = {}
+  responde.changes[indexF] = {}
+
+  propiedades.map(e => {
+    responde.interaction[index][e] = int[0].interaction[index][e]
+    responde.changes[index][e] = int[0].changes[index][e]
+
+    responde.interaction[indexF][e] = int[0].interaction[indexF][e]
+    responde.changes[indexF][e] = int[0].changes[indexF][e]
+  })
+
+  res.json(responde);
+});
+
+// POST new URL
 router.post('/', async (req, res) => {
   const { url, interaction, changes } = req.body;
   const int = new Urls({ _id: url.replace(/\//g, '.'), url, interaction, changes: schema_data });
@@ -105,7 +162,7 @@ router.post('/', async (req, res) => {
   res.json(int)
 });
 
-// UPDATE a URL
+// UPDATE URL
 router.put('/:id/:total/:n', async (req, res) => {
   const int = await Urls.findById(req.params.id);
   let { url, interaction } = req.body;
