@@ -6,7 +6,7 @@ const schema_data = { "url": true, "ok": true, "statusCode": true, "canonical": 
 const msgChange = { "msg": '' }
 // Urls Model
 const Urls = require('../models/urls');
-
+// Aquí se debe seleccionar el cliente
 const cliente = /cesce.es/
 
 /**
@@ -62,7 +62,7 @@ router.get('/:id', async (req, res) => {
   if (cliente.test(req.params.id)) {
     const int = await Urls.findById(req.params.id);
     res.json(int);
-  } else {res.send('Acceso erroneo')}
+  } else { res.send('Acceso erroneo') }
 });
 
 /**
@@ -89,7 +89,7 @@ router.get('/changes/:id', async (req, res) => {
     })
     const changes = { urlFinal: int.url, changes: int.changes }
     res.json(changes);
-  } else {res.send('Acceso erroneo')}
+  } else { res.send('Acceso erroneo') }
 });
 
 /**
@@ -101,7 +101,7 @@ router.get('/:id/:date', async (req, res) => {
     const index = int[0].interaction.findIndex(e => e.date == req.params.date)
     const responde = { interaction: int[0].interaction[index], changes: int[0].changes[index] }
     res.json(responde);
-  } else {res.send('Acceso erroneo')}
+  } else { res.send('Acceso erroneo') }
 });
 
 /**
@@ -114,7 +114,7 @@ router.get('/:id/:dateI/:dateF', async (req, res) => {
     const indexF = int[0].interaction.findIndex(e => e.date == req.params.dateF)
     const responde = { interaction: int[0].interaction.slice(index, indexF + 1), changes: int[0].changes.slice(index, indexF + 1) }
     res.json(responde);
-  } else {res.send('Acceso erroneo')}
+  } else { res.send('Acceso erroneo') }
 });
 
 /**
@@ -133,7 +133,7 @@ router.get('/:id/:date/content/:propiedad', async (req, res) => {
     })
 
     res.json(responde);
-  } else {res.send('Acceso erroneo')}
+  } else { res.send('Acceso erroneo') }
 });
 
 /**
@@ -160,7 +160,7 @@ router.get('/:id/:dateI/:dateF/content/:propiedad', async (req, res) => {
     })
 
     res.json(responde);
-  } else {res.send('Acceso erroneo')}
+  } else { res.send('Acceso erroneo') }
 });
 
 // POST new URL
@@ -232,7 +232,76 @@ router.put('/:id/:total/:n', async (req, res) => {
 
     await Urls.findByIdAndUpdate(req.params.id, { url, interaction, changes });
     res.json(int);
-  } else {res.send('Acceso erroneo')}
+  } else { res.send('Acceso erroneo') }
 });
+
+// Delete
+/**
+ * Delete all
+ */
+router.delete('/', async (req, res) => {
+  Urls.deleteMany({ _id: cliente }, function (err, result) {
+    if (err) console.log("error query");
+    else console.log(result);
+  })
+  res.send('Eliminado correctamente')
+})
+
+/**
+ * Delete data de una fecha
+ */
+router.delete('/date/:date', async (req, res) => {
+  const int = await Urls.find({ _id: cliente });
+  const responde = [];
+
+  int.map(async (a, i) => {
+    const index = a.interaction.findIndex(e => e.date == req.params.date)
+    const newInteraction = a.interaction
+    const newChanges = a.changes
+    const url = a.url
+
+    a.interaction.splice(index, 1)
+    a.changes.splice(index, 1)
+    responde[i] = { interaction: newInteraction, changes: newChanges }
+
+    if (index !== -1) {
+      await Urls.findByIdAndUpdate(a._id, { url, interaction: newInteraction, changes: newChanges });
+      res.send('Entrada eliminada');
+    }
+    else {res.send('Nada que borrar');}
+  })
+})
+
+/**
+ * Delete una url
+ */
+router.delete('/:id', async (req, res) => {
+  Urls.deleteOne({ _id: req.params.id }, function (err, result) {
+    if (err) console.log("error query");
+    else console.log(result);
+  })
+  res.send('Eliminado correctamente')
+})
+
+/**
+ * Delete data de una url y de una fecha
+ */
+router.delete('/:id/:date', async (req, res) => {
+  if (cliente.test(req.params.id)) {
+    const int = await Urls.find({ _id: req.params.id });
+    const index = int[0].interaction.findIndex(e => e.date == req.params.date)
+    const newInteraction = int[0].interaction
+    const newChanges = int[0].changes
+    const url = int[0].url
+    int[0].interaction.splice(index, 1)
+    int[0].changes.splice(index, 1)
+    
+    if (index !== -1) {
+      await Urls.findByIdAndUpdate(req.params.id, { url, interaction: newInteraction, changes: newChanges });
+      res.send('Entrada eliminada');
+    } else {res.send('Nada que borrar');}
+
+  } else { res.send('Acceso erroneo') }
+})
 
 module.exports = router;
