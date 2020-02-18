@@ -4,12 +4,12 @@ const fs = require("fs");
 const scrape = require('url-metadata');
 const cheerio = require('cheerio');
 
-const { apiURL } = require('./src/constants');
+const { cesce } = require('./src/constants');
 
 /**
  * Lectura del listado de url y obtención de los datos de la url.
  */
-fs.readFile('./input/urls.txt', "utf-8", (err, data) => {
+fs.readFile('./input/cesce.txt', "utf-8", (err, data) => {
   const urls = data.toString().replace(/\n/g, '').split('\r');
   const dateGet = new Date;
   date = `${dateGet.getFullYear()}-${(dateGet.getMonth() + 1) < 10 ? '0' + (dateGet.getMonth() + 1) : dateGet.getMonth() + 1}-${dateGet.getDate() < 10 ? '0' + dateGet.getDate() : dateGet.getDate()}`
@@ -27,9 +27,9 @@ fs.readFile('./input/urls.txt', "utf-8", (err, data) => {
                 const $ = cheerio.load(body, { decodeEntities: false })
                 /**
                  * Aquí se debe incluir las líneas de los contenedores que queremos eliminar.
+                 * $('.c-footer__rating').remove().html()
                  */
-                $('.c-footer__rating').remove().html()
-                $('.c-clients').remove().html()
+                
                 /** --------------------------------------------------------------------------- */
                 Array.from($('h1, h2, h3, h4, h5, h6, p')).map((e, i) => {
                   const tagName = $(e)[0].name;
@@ -54,20 +54,20 @@ fs.readFile('./input/urls.txt', "utf-8", (err, data) => {
             .then(data => {
               const idUrl = e.replace(/\//g, '.')
               //* Comprobación si la url ya existe.
-              fetch(`${apiURL}/${idUrl}`).then(res => res.json())
+              fetch(`${cesce}/${idUrl}`).then(res => res.json())
                 .then(async ok => {
                   if (!ok) { // Si la url no estaba registrada se hace un POST (Registro)
                     // Llamada a la api de SISTRIX
                     data = JSON.parse(data)
                     data.interaction[0].VI = 0;
 
-                    fetch(`${apiURL}/`, { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
+                    fetch(`${cesce}/`, { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
                       .then(res => res.json())
                       .then(res => console.log(e, '------------- OK'))
                   } else { // Si la url estaba registrada se hace un PUT (Update)
                     data = JSON.parse(data)
 
-                    fetch(`${apiURL}/${idUrl}/${urls.length}/${i}`, { method: 'PUT', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
+                    fetch(`${cesce}/${idUrl}/${urls.length}/${i}`, { method: 'PUT', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } })
                       .then(res => res.json())
                       .then(res => console.log(e, '------------- OK'))
                   }

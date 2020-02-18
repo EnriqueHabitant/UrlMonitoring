@@ -12,7 +12,7 @@ exports.sendEmail = function (req, res, asunto, msg) {
   // Definimos el email
   var mailOptions = {
     from: 'enrique.deridder@habitant.es',
-    to: ['enrique.deridder@habitant.es', 'daniel.moreno@habitant.es'],
+    to: ['enrique.deridder@habitant.es'],
     subject: asunto,
     html: `${msg}`
   };

@@ -23,7 +23,8 @@ app.use(bodyParser.json({limit:1024*1024*20, type:'application/json'}));
 app.use(bodyParser.urlencoded({extended:true,limit:1024*1024*20,type:'application/x-www-form-urlencoding' }));
 
 // Routes
-app.use('/api/www.einforma.com', require('./routes/url.routes'));
+app.use('/api/einforma', require('./routes/einforma.routes'));
+app.use('/api/cesce', require('./routes/cesce.routes'));
 
 // Static Files
 app.use(express.static(path.join(__dirname, 'public')));;
