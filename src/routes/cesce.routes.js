@@ -8,6 +8,10 @@ const msgChange = { "msg": '' }
 const Urls = require('../models/urls');
 // Aquí se debe seleccionar el cliente
 const cliente = /cesce.es/
+/**
+ * Aquí se debe incluir los email de los usuarios que se quieren notificar
+ */
+const to = ["saskia.moreno@habitant.es", "enrique.deridder@habitant.es"];
 
 /**
  * GET todas las URLS & toda la Data
@@ -220,7 +224,7 @@ router.put('/:id/:total/:n', async (req, res) => {
       }
 
       //Envio de email
-      if (nTotal === (n + 1) && msgChange.msg.length !== 0) EmailCtrl.sendEmail('', '', 'Una url monitorizada ha cambiado', msgChange.msg);
+      if (nTotal === (n + 1) && msgChange.msg.length !== 0) EmailCtrl.sendEmail('', '', 'Una url monitorizada ha cambiado', msgChange.msg, to);
       else if (nTotal === (n + 1) && msgChange.msg.length === 0) console.log('NO CHANGES');
 
     } catch (error) {

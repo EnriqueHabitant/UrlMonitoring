@@ -1,6 +1,6 @@
 var nodemailer = require('nodemailer');
 // email sender function
-exports.sendEmail = function (req, res, asunto, msg) {
+exports.sendEmail = function (req, res, asunto, msg, to) {
   // Definimos el transporter
   var transporter = nodemailer.createTransport({
     service: 'Gmail',
@@ -12,7 +12,7 @@ exports.sendEmail = function (req, res, asunto, msg) {
   // Definimos el email
   var mailOptions = {
     from: 'enrique.deridder@habitant.es',
-    to: ['enrique.deridder@habitant.es'],
+    to: to,
     subject: asunto,
     html: `${msg}`
   };

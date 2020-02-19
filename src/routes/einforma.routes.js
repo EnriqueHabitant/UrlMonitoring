@@ -7,7 +7,11 @@ const msgChange = { "msg": '' }
 // Urls Model
 const Urls = require('../models/urls');
 // Aquí se debe seleccionar el cliente
-const cliente = /einforma.com/
+const cliente = /www.einforma.com/
+/**
+ * Aquí se debe incluir los email de los usuarios que se quieren notificar
+ */
+const to = ["enrique.deridder@habitant.es"];
 
 /**
  * GET todas las URLS & toda la Data
@@ -220,7 +224,7 @@ router.put('/:id/:total/:n', async (req, res) => {
       }
 
       //Envio de email
-      if (nTotal === (n + 1) && msgChange.msg.length !== 0) EmailCtrl.sendEmail('', '', 'Una url monitorizada ha cambiado', msgChange.msg);
+      if (nTotal === (n + 1) && msgChange.msg.length !== 0) EmailCtrl.sendEmail('', '', 'Una url monitorizada ha cambiado', msgChange.msg, to);
       else if (nTotal === (n + 1) && msgChange.msg.length === 0) console.log('NO CHANGES');
 
     } catch (error) {
@@ -268,7 +272,7 @@ router.delete('/date/:date', async (req, res) => {
       await Urls.findByIdAndUpdate(a._id, { url, interaction: newInteraction, changes: newChanges });
       res.send('Entrada eliminada');
     }
-    else { res.send('Nada que borrar'); }
+    else {res.send('Nada que borrar');}
   })
 })
 
@@ -295,11 +299,11 @@ router.delete('/:id/:date', async (req, res) => {
     const url = int[0].url
     int[0].interaction.splice(index, 1)
     int[0].changes.splice(index, 1)
-
+    
     if (index !== -1) {
       await Urls.findByIdAndUpdate(req.params.id, { url, interaction: newInteraction, changes: newChanges });
       res.send('Entrada eliminada');
-    } else { res.send('Nada que borrar'); }
+    } else {res.send('Nada que borrar');}
 
   } else { res.send('Acceso erroneo') }
 })
